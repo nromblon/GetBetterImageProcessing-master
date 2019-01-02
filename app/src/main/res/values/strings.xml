@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">GeeBeeCapture</string>
+    <string name="photo">take picture</string>
+    <string name="compute">compute and save</string>
+    <string name="change_image">load picture</string>
+    <string name="front_view">Front</string>
+    <string name="side_view">Side</string>
+    <string name="go_back">Finish. Back to GeeBee</string>
+    <string name="cancel">Cancel</string>
+</resources>
