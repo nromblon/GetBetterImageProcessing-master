@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 25
-    buildToolsVersion '25.0.2'
+    buildToolsVersion '27.0.3'
 
     defaultConfig {
         applicationId "ph.edu.dlsu.reanna_lim.imageprocessingmodule"
@@ -20,9 +20,9 @@ android {
 }
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile project(':openCVLibrary320')
-    compile 'commons-io:commons-io:+'
-    compile 'com.android.support:appcompat-v7:25.1.0'
-    compile 'com.google.android.gms:play-services-appindexing:8.1.0'
+    api fileTree(include: ['*.jar'], dir: 'libs')
+    api project(':openCVLibrary320')
+    api 'commons-io:commons-io:+'
+    api 'com.android.support:appcompat-v7:25.4.0'
+    api 'com.google.android.gms:play-services-appindexing:9.8.0'
 }
