@@ -537,6 +537,7 @@ public class MainActivityTablet extends AppCompatActivity {
                 requestCode == SELECT_PHOTO2 && resultCode == Activity.RESULT_OK) {
             try {
                 Uri imageUri = data.getData();
+                System.out.println("imageURI: "+data.getData());
                 InputStream imageStream = getContentResolver().openInputStream(imageUri);
                 Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
                 bmp_targetImage = selectedImage;
