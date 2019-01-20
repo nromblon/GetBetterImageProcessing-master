@@ -3,9 +3,7 @@ package ph.edu.dlsu.reanna_lim.imageprocessingmodule;
 import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -14,13 +12,10 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -39,8 +34,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class MainActivityTablet extends AppCompatActivity {
@@ -49,8 +47,6 @@ public class MainActivityTablet extends AppCompatActivity {
     private static final int CAMERA_REQUEST2 = 1889;
     private final int SELECT_PHOTO1 = 1;
     private final int SELECT_PHOTO2 = 2;
-
-
 
     private ImageView imageView1, imageView2;
     private Mat mat_targetOrigImage;
@@ -66,6 +62,8 @@ public class MainActivityTablet extends AppCompatActivity {
     Double final_weight = 0.0;
     private String path1, path2;
     private Bitmap bmp_silhouette;
+
+    private Uri currentImageURI;
 
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
@@ -96,7 +94,15 @@ public class MainActivityTablet extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                startActivityForResult(cameraIntent, CAMERA_REQUEST1);
+                try {
+                    currentImageURI = createTempImageFile();
+                    cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT,currentImageURI);
+                    System.out.println("URI: "+currentImageURI);
+                    if (cameraIntent.resolveActivity(getPackageManager()) != null)
+                        startActivityForResult(cameraIntent, CAMERA_REQUEST1);
+                } catch(Exception e){
+                    e.printStackTrace();
+                }
             }
         });
 
@@ -104,7 +110,15 @@ public class MainActivityTablet extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                startActivityForResult(cameraIntent, CAMERA_REQUEST2);
+                try {
+                    currentImageURI = createTempImageFile();
+                    cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT,currentImageURI);
+                    System.out.println("URI: "+currentImageURI);
+                    if (cameraIntent.resolveActivity(getPackageManager()) != null)
+                        startActivityForResult(cameraIntent, CAMERA_REQUEST2);
+                } catch(IOException e){
+                    e.printStackTrace();
+                }
             }
         });
 
@@ -532,32 +546,65 @@ public class MainActivityTablet extends AppCompatActivity {
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == CAMERA_REQUEST1 && resultCode == Activity.RESULT_OK ||
-                requestCode == CAMERA_REQUEST2 && resultCode == Activity.RESULT_OK ||
-                requestCode == SELECT_PHOTO1 && resultCode == Activity.RESULT_OK ||
-                requestCode == SELECT_PHOTO2 && resultCode == Activity.RESULT_OK) {
-            try {
-                Uri imageUri = data.getData();
-                System.out.println("imageURI: "+data.getData());
-                InputStream imageStream = getContentResolver().openInputStream(imageUri);
-                Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
-                bmp_targetImage = selectedImage;
+            requestCode == CAMERA_REQUEST2 && resultCode == Activity.RESULT_OK ||
+            requestCode == SELECT_PHOTO1 && resultCode == Activity.RESULT_OK ||
+            requestCode == SELECT_PHOTO2 && resultCode == Activity.RESULT_OK) {
 
-                Utils.bitmapToMat(bmp_targetImage, mat_targetOrigImage);
-                path1="";
-                path2="";
-                if(requestCode == CAMERA_REQUEST1 || requestCode == SELECT_PHOTO1){
-                    //currentImage = 0;
-                    imageView1.setImageBitmap(selectedImage);
-                    path1 = getRealPathFromURI(imageUri);
-                }
-                if(requestCode == CAMERA_REQUEST2 || requestCode == SELECT_PHOTO2){
-                    //currentImage = 1;
-                    imageView2.setImageBitmap(selectedImage);
-                    path2 = getRealPathFromURI(imageUri);
-                }
+//            System.out.println("Intent: "+data);    // This will return null if EXTRA_OUTPUT has a value
 
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
+            // OLD
+//            Uri imageUri = data.getData();
+//            System.out.println("imageURI: "+data.getData());
+//            InputStream imageStream = getContentResolver().openInputStream(imageUri);
+//            Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
+
+            // NEW
+//            Bundle extras = data.getExtras();
+//            Uri imageUri = (Uri) extras.get(MediaStore.EXTRA_OUTPUT);
+//            System.out.println("extras'Output URI']: "+imageUri);
+//            InputStream imageStream = null;
+//
+//            try {
+//                imageStream = getContentResolver().openInputStream(imageUri);
+//            } catch(FileNotFoundException e){
+//                e.printStackTrace();
+//                return;
+//            }
+//            Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
+
+            // TEST
+            Uri imageUri = currentImageURI;
+            System.out.println("imageURI: "+imageUri);
+//            InputStream imageStream = null;
+//            try {
+//                imageStream = getContentResolver().openInputStream(imageUri);
+//                System.out.println("ImageStream:: "+imageStream);
+//            }catch(FileNotFoundException e){
+//                e.printStackTrace();
+//                return;
+//            }
+            System.out.println("File path: "+imageUri.getPath());
+            System.out.println("File encoded Path: "+imageUri.getEncodedPath());
+            Bitmap selectedImage = decodeToBMP(imageUri.getPath(),imageView1.getMaxWidth(),imageView2.getMaxHeight());
+            System.out.println("BMP decoded: "+selectedImage);
+
+            // Continue
+            bmp_targetImage = selectedImage;
+
+            Utils.bitmapToMat(bmp_targetImage, mat_targetOrigImage);
+            path1="";
+            path2="";
+
+            if(requestCode == CAMERA_REQUEST1 || requestCode == SELECT_PHOTO1){
+                //currentImage = 0;
+                imageView1.setImageBitmap(selectedImage);
+                path1 = getRealPathFromURI(imageUri);
+            }
+
+            if(requestCode == CAMERA_REQUEST2 || requestCode == SELECT_PHOTO2){
+                //currentImage = 1;
+                imageView2.setImageBitmap(selectedImage);
+                path2 = getRealPathFromURI(imageUri);
             }
 
         }
@@ -721,5 +768,52 @@ public class MainActivityTablet extends AppCompatActivity {
         Mat mat = new Mat();
         Utils.bitmapToMat(image,mat);
         return mat;
+    }
+
+    /**
+     * Creates and returns the URI of a collision-free temporary image file that serves as the placeholder for the image to be saved and used.
+     * Use image.getAbsolutePath() to obtain its path.
+     * @return temp image file URI. can be used to get its filepath and such
+     * @throws IOException
+     */
+    private Uri createTempImageFile() throws IOException{
+        // Create an image file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timeStamp+"_";
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
+
+        return Uri.fromFile(image);
+    }
+
+    /**
+     * Decodes a photo file into a much smaller bitmap given the specified Width and Height.
+     * @param path the path of the file to be decoded
+     * @param targetW the specified width
+     * @param targetH the specified height
+     * @return decoded bitmap
+     */
+    private Bitmap decodeToBMP(String path, int targetW, int targetH){
+        // Get the dimensions of the bitmap
+        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+        bmOptions.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(path, bmOptions);
+        int photoW = bmOptions.outWidth;
+        int photoH = bmOptions.outHeight;
+
+        // Determine how much to scale down the image
+        int scaleFactor = Math.min(photoW/targetW, photoH/targetH);
+
+        // Decode the image file into a Bitmap sized to fill the View
+        bmOptions.inJustDecodeBounds = false;
+        bmOptions.inSampleSize = scaleFactor;
+        bmOptions.inPurgeable = true;
+
+        Bitmap bitmap = BitmapFactory.decodeFile(path, bmOptions);
+        return bitmap;
     }
 }

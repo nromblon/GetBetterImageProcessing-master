@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="ph.edu.dlsu.reanna_lim.imageprocessingmodule">
 
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
     <protected-broadcast android:name="android.intent.action.MEDIA_MOUNTED" />
 
@@ -39,16 +39,14 @@
         <activity android:name=".MainActivityTablet">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
-
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <!--<activity android:name=".Test"></activity>-->
+
     </application>
 
 </manifest>
