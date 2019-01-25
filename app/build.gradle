@@ -23,7 +23,8 @@ android {
 dependencies {
     api fileTree(include: ['*.jar'], dir: 'libs')
     api project(':openCVLibrary320')
-    api 'commons-io:commons-io:+'
-    api 'com.android.support:appcompat-v7:25.4.0'
-    api 'com.google.android.gms:play-services-appindexing:9.8.0'
+    api 'commons-io:commons-io:2.6'
+    api 'com.android.support:appcompat-v7:25.0.0'
+    api 'com.android.support.constraint:constraint-layout:1.1.3'
+    api 'com.google.firebase:firebase-appindexing:17.1.0'
 }
